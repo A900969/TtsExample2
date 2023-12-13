@@ -38,7 +38,9 @@
         android:src="@drawable/ic_pause"
         android:contentDescription="Iniciar reproducción"
         android:background="?android:attr/selectableItemBackground"
+        android:enabled="false"
         />
+
 
 
     <ImageButton
@@ -51,6 +53,6 @@
         android:src="@drawable/ic_stop"
         android:contentDescription="Iniciar reproducción"
         android:background="?android:attr/selectableItemBackground"
-
+        android:enabled="false"
         />
 </RelativeLayout>

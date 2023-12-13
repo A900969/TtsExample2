@@ -5,10 +5,12 @@ import android.media.MediaRecorder
 import android.os.Build
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
+import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.os.bundleOf
 import java.io.File
+import java.io.FileOutputStream
 import java.io.IOException
 import java.util.Locale
 
@@ -32,9 +34,9 @@ class TextToSpeechRecorder(context: Context?) {
         outputFile = File(context?.getExternalFilesDir(null), "audio.mp3")
     }
 
-    // Convertir texto a voz y grabar el resultado
+
     fun convertTextToSpeechAndRecord(text: String?) {
-        textToSpeech!!.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
+        textToSpeech?.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
             @RequiresApi(Build.VERSION_CODES.O)
             override fun onStart(utteranceId: String) {
                 startRecording()
@@ -45,7 +47,7 @@ class TextToSpeechRecorder(context: Context?) {
             }
 
             override fun onError(utteranceId: String) {
-
+                Log.d("JRB", "Error on record")
             }
         })
 
@@ -55,17 +57,18 @@ class TextToSpeechRecorder(context: Context?) {
             TextToSpeech.Engine.KEY_PARAM_VOLUME to 0.8f //volume adjust
         )
 
-        textToSpeech.synthesizeToFile(text, params, outputFile, "UtteranceId")
+        textToSpeech?.synthesizeToFile(text, params, outputFile, "UtteranceId")
     }
 
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun startRecording() {
+
         mediaRecorder = MediaRecorder()
         mediaRecorder!!.setAudioSource(MediaRecorder.AudioSource.MIC)
         mediaRecorder!!.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
-        mediaRecorder!!.setOutputFile(outputFile)
         mediaRecorder!!.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
+        mediaRecorder!!.setOutputFile(outputFile.absolutePath)
         try {
             mediaRecorder!!.prepare()
         } catch (e: IOException) {
@@ -91,7 +94,7 @@ class TextToSpeechRecorder(context: Context?) {
         }
     }
 
-    fun getOutputFilePath(): File {
+    fun getOutputFile(): File {
         return outputFile
     }
 }

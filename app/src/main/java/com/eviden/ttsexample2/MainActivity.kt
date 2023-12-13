@@ -14,7 +14,7 @@ class MainActivity : AppCompatActivity() {
         ActivityMainBinding.inflate(layoutInflater)
     }
 
-    private lateinit var mediaPlayer: MediaPlayer
+    private var mediaPlayer: MediaPlayer = MediaPlayer()
     private lateinit var textToSpeechRecorder: TextToSpeechRecorder
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -23,13 +23,21 @@ class MainActivity : AppCompatActivity() {
 
         textToSpeechRecorder = TextToSpeechRecorder(this)
         textToSpeechRecorder.convertTextToSpeechAndRecord(binding.textView.text.toString())
-        val outputFile = textToSpeechRecorder.getOutputFilePath()
-        val uri = Uri.fromFile(outputFile)
-        mediaPlayer = MediaPlayer.create(this, uri)
+        val outputFile = textToSpeechRecorder.getOutputFile()
+        mediaPlayer = MediaPlayer.create(this, R.raw.sample_audio)
+
 
         binding.startButton.setOnClickListener {
-            mediaPlayer.prepare()
-            mediaPlayer.start()
+            try{
+                val uri = Uri.parse("file:///"+outputFile.absolutePath)
+                mediaPlayer.setDataSource(this, uri)
+                mediaPlayer.prepare()
+                mediaPlayer.start()
+                binding.stopButton.isEnabled = true
+                binding.pauseButton.isEnabled = true
+            }catch (e: IOException) {
+                e.printStackTrace()
+            }
         }
 
         binding.pauseButton.setOnClickListener {
@@ -42,6 +50,8 @@ class MainActivity : AppCompatActivity() {
             if (mediaPlayer.isPlaying) {
                 mediaPlayer.stop()
                 mediaPlayer.prepare()
+                binding.stopButton.isEnabled = false
+                binding.pauseButton.isEnabled = false
             }
         }
     }
