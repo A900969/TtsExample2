@@ -31,7 +31,7 @@ class TextToSpeechRecorder(context: Context?) {
         }
         if (create) textToSpeech.language = Locale.getDefault()
         // Output file path
-        outputFile = File(context?.getExternalFilesDir(null), "audio.mp3")
+        outputFile = File(context?.getExternalFilesDir(null), "audio.wav")
     }
 
 
@@ -58,6 +58,7 @@ class TextToSpeechRecorder(context: Context?) {
         )
 
         textToSpeech?.synthesizeToFile(text, params, outputFile, "UtteranceId")
+        Log.d("JRB", "Error on record")
     }
 
 

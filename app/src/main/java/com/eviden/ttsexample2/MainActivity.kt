@@ -23,14 +23,13 @@ class MainActivity : AppCompatActivity() {
 
         textToSpeechRecorder = TextToSpeechRecorder(this)
         textToSpeechRecorder.convertTextToSpeechAndRecord(binding.textView.text.toString())
-        val outputFile = textToSpeechRecorder.getOutputFile()
-        mediaPlayer = MediaPlayer.create(this, R.raw.sample_audio)
+        val outputFile = TTS(this).speakToBuffer(binding.textView.text.toString())
+        val uri = Uri.parse("file:///"+outputFile.absolutePath)
+        mediaPlayer = MediaPlayer.create(this, uri)
 
 
         binding.startButton.setOnClickListener {
             try{
-                val uri = Uri.parse("file:///"+outputFile.absolutePath)
-                mediaPlayer.setDataSource(this, uri)
                 mediaPlayer.prepare()
                 mediaPlayer.start()
                 binding.stopButton.isEnabled = true
