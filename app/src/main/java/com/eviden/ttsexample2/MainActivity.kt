@@ -1,20 +1,15 @@
 package com.eviden.ttsexample2
 
-import android.content.Intent
-import android.content.pm.PackageManager
 import android.media.MediaPlayer
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.speech.tts.TextToSpeech
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import com.eviden.ttsexample2.databinding.ActivityMainBinding
 import java.io.File
-import java.io.IOException
+import java.util.Locale
 
 
 class MainActivity : AppCompatActivity() {
@@ -23,35 +18,50 @@ class MainActivity : AppCompatActivity() {
         ActivityMainBinding.inflate(layoutInflater)
     }
 
-    companion object {
-        const val REQUEST_PERMISSION_WRITE_EXTERNAL_STORAGE = 1
-    }
-
     private var mediaPlayer: MediaPlayer = MediaPlayer()
     private lateinit var textToSpeechRecorder: TextToSpeechRecorder
     private lateinit var file: File
     private lateinit var textToSpeech: TextToSpeech
+    private var mAudioFilename = ""
+    private var mUtteranceID = "TextToSpeechAudio"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
-        file = File(this.getExternalFilesDir(null), "audio.mp3")
+        textToSpeech = TextToSpeech(this) {
+            textToSpeech.language = Locale.ENGLISH
+        }
 
-        textToSpeech = TextToSpeech(this) { status ->
-            if (status == TextToSpeech.SUCCESS) {
-                Toast.makeText(this, "TTS init", Toast.LENGTH_LONG).show()
-            } else {
-                Toast.makeText(this, "No se pudo inicializar tts.", Toast.LENGTH_LONG).show()
+        binding.startButton.setOnClickListener {
+            saveToAudioFile("Esto es un texto de prueba nada más y nada menos")
+            createFile()
+        }
+    }
+
+    fun createFile() {
+        file = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "Tech to Speech Audio")
+        if(!file.exists()) {
+            val isDirectoryCreated = file.mkdirs()
+            if(!isDirectoryCreated) {
+                Toast.makeText(this, "Can't create directory to save the Audio", Toast.LENGTH_SHORT).show()
             }
         }
+        file.mkdirs()
 
+        mAudioFilename = file.absolutePath + "/" + mUtteranceID + System.currentTimeMillis() + ".wav"
+    }
+
+    fun saveToAudioFile(text: String) {
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            textToSpeech.synthesizeToFile("Esto es un texto de prueba", null, file, null)
+            textToSpeech.synthesizeToFile(text, null, File(mAudioFilename), mUtteranceID)
         }
         else {
-            textToSpeech.synthesizeToFile("Esto es un texto de prueba", null, file.absolutePath)
+            val hm = HashMap<String, String>()
+            hm.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, mUtteranceID)
+            textToSpeech.synthesizeToFile(text, hm, mAudioFilename)
         }
+    }
 
 //        val shareIntent = Intent()
 //        shareIntent.action = Intent.ACTION_SEND
@@ -60,7 +70,7 @@ class MainActivity : AppCompatActivity() {
 //        startActivity(Intent.createChooser(shareIntent, "Send to"))
 
 
-        binding.startButton.setOnClickListener {
+      /*  binding.startButton.setOnClickListener {
             try{
                 val uri = Uri.parse("content:///" + file.absolutePath)
                 mediaPlayer.setDataSource(this, uri)
@@ -86,8 +96,8 @@ class MainActivity : AppCompatActivity() {
                 binding.stopButton.isEnabled = false
                 binding.pauseButton.isEnabled = false
             }
-        }
-    }
+        }*/
+
 
     override fun onDestroy() {
         // Release resources
